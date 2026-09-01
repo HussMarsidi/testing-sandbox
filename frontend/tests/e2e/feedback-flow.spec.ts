@@ -8,23 +8,34 @@ const COPY = {
   submitButton: "Submit feedback",
   successMessage: "Thank you! Your feedback has been received.",
   complaintsPageTitle: "All complaints",
-  navComplaints: "View complaints",
+  navLogin: "Sign in",
+  usernameLabel: "Username",
+  passwordLabel: "Password",
+  loginButton: "Sign in",
 } as const;
 
-test("submits feedback and shows it on the complaints page", async ({ page }) => {
+test("submits feedback, signs in, and shows it on the complaints page", async ({
+  page,
+}) => {
   const uniqueMessage = `E2E complaint at ${Date.now()}`;
 
   await page.goto("/");
+  await expect(page.getByLabel(COPY.categoryLabel)).toBeEnabled();
 
   await page.getByLabel(COPY.nameLabel).fill("Playwright User");
   await page.getByLabel(COPY.emailLabel).fill("playwright@example.com");
-  await page.getByLabel(COPY.categoryLabel).selectOption("bug");
+  await page.getByLabel(COPY.categoryLabel).selectOption({ label: "Bug" });
   await page.getByLabel(COPY.messageLabel).fill(uniqueMessage);
   await page.getByRole("button", { name: COPY.submitButton }).click();
 
   await expect(page.getByRole("status")).toHaveText(COPY.successMessage);
 
-  await page.getByLabel("Main").getByRole("link", { name: COPY.navComplaints }).click();
+  await page.getByLabel("Main").getByRole("link", { name: COPY.navLogin }).click();
+  await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  await page.getByLabel(COPY.usernameLabel).fill("admin");
+  await page.getByLabel(COPY.passwordLabel).fill("password");
+  await page.getByRole("button", { name: COPY.loginButton }).click();
+
   await expect(
     page.getByRole("heading", { name: COPY.complaintsPageTitle }),
   ).toBeVisible();

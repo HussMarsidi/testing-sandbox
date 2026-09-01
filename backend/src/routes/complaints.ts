@@ -1,4 +1,6 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { verify } from "hono/jwt";
+import { getJwtSecret } from "../auth.js";
 import { insertComplaint, listComplaints } from "../db.js";
 import {
   ComplaintSchema,
@@ -12,12 +14,21 @@ const listComplaintsRoute = createRoute({
   path: "/api/complaints",
   tags: ["Complaints"],
   summary: "List all complaints",
+  security: [{ bearerAuth: [] }],
   responses: {
     200: {
       description: "All complaints, newest first",
       content: {
         "application/json": {
           schema: z.array(ComplaintSchema),
+        },
+      },
+    },
+    401: {
+      description: "Unauthorized",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
         },
       },
     },
@@ -76,7 +87,29 @@ const createComplaintRoute = createRoute({
 
 export const complaintsApp = new OpenAPIHono();
 
-complaintsApp.openapi(listComplaintsRoute, (c) => {
+async function requireAuth(
+  authorizationHeader: string | undefined,
+): Promise<boolean> {
+  if (!authorizationHeader?.startsWith("Bearer ")) {
+    return false;
+  }
+
+  const token = authorizationHeader.slice("Bearer ".length);
+
+  try {
+    await verify(token, getJwtSecret(), "HS256");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+complaintsApp.openapi(listComplaintsRoute, async (c) => {
+  const isAuthorized = await requireAuth(c.req.header("Authorization"));
+  if (!isAuthorized) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
   try {
     const complaints = listComplaints();
     return c.json(complaints, 200);

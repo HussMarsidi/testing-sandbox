@@ -5,6 +5,13 @@ export const ComplaintCategorySchema = z
   .enum(COMPLAINT_CATEGORIES)
   .openapi({ example: "bug" });
 
+export const CategoryOptionSchema = z
+  .object({
+    value: ComplaintCategorySchema,
+    label: z.string().openapi({ example: "Bug" }),
+  })
+  .openapi("CategoryOption");
+
 export const CreateComplaintSchema = z
   .object({
     name: z.string().trim().min(1).max(100).openapi({ example: "Jane Doe" }),
@@ -32,6 +39,19 @@ export const CreateComplaintResponseSchema = z
     id: z.number().int().positive().openapi({ example: 1 }),
   })
   .openapi("CreateComplaintResponse");
+
+export const LoginRequestSchema = z
+  .object({
+    username: z.string().trim().min(1).openapi({ example: "admin" }),
+    password: z.string().min(1).openapi({ example: "password" }),
+  })
+  .openapi("LoginRequest");
+
+export const LoginResponseSchema = z
+  .object({
+    token: z.string().openapi({ example: "jwt-token" }),
+  })
+  .openapi("LoginResponse");
 
 export const ErrorResponseSchema = z
   .object({

@@ -17,15 +17,20 @@ complaints list, every test layer, and one CI gate.
 
 A feedback form: **name, email, category, message.**
 
-- Frontend: `FeedbackForm` (React + TypeScript)
-- Backend: `POST /api/complaints` (Hono + SQLite)
+- Frontend: `FeedbackForm` (React + TypeScript) — categories loaded from API
+- Backend: `POST /api/complaints` (Hono + SQLite, public)
 
 ### View complaints
 
-A second page that lists everything submitted.
+A second page that lists everything submitted. **Requires sign-in.**
 
-- Frontend: complaints list page
-- Backend: `GET /api/complaints`
+- Frontend: complaints list page (protected route)
+- Backend: `GET /api/complaints` (JWT bearer auth)
+
+### Supporting APIs
+
+- `GET /api/categories` — dropdown options for the form
+- `POST /api/auth/login` — returns JWT (`admin` / `password` seeded in SQLite)
 
 ---
 

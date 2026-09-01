@@ -2,35 +2,70 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { App } from "../../src/App";
+import { ProtectedRoute } from "../../src/components/ProtectedRoute";
+import { AuthProvider } from "../../src/context/AuthContext";
+import { CategoriesProvider } from "../../src/context/CategoriesContext";
 import { ComplaintsListPage } from "../../src/pages/ComplaintsListPage";
+import { LoginPage } from "../../src/pages/LoginPage";
 import { COPY } from "../../src/lib/validators";
-import { server, setListFailure } from "../mocks/handlers";
+import {
+  MOCK_ADMIN_PASSWORD,
+  MOCK_ADMIN_USERNAME,
+  server,
+  setListFailure,
+  setLoginFailure,
+} from "../mocks/handlers";
+import { authenticateTestUser, clearAuthenticatedUser } from "../helpers/auth";
+import { fillFeedbackForm, loginThroughUi } from "../helpers/form";
+
+function renderProtectedComplaints(initialEntry = "/complaints") {
+  return render(
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <AuthProvider>
+        <CategoriesProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/complaints"
+              element={
+                <ProtectedRoute>
+                  <ComplaintsListPage />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </CategoriesProvider>
+      </AuthProvider>
+    </MemoryRouter>,
+  );
+}
 
 describe("ComplaintsListPage", () => {
+  beforeEach(() => {
+    clearAuthenticatedUser();
+    setListFailure(false);
+    setLoginFailure(false);
+  });
+
+  it("redirects to login when not authenticated", async () => {
+    renderProtectedComplaints();
+
+    expect(await screen.findByRole("heading", { name: COPY.loginTitle })).toBeInTheDocument();
+  });
+
   it("shows an empty state when there are no complaints", async () => {
-    render(
-      <MemoryRouter initialEntries={["/complaints"]}>
-        <Routes>
-          <Route path="/complaints" element={<ComplaintsListPage />} />
-        </Routes>
-      </MemoryRouter>,
-    );
+    authenticateTestUser();
+    renderProtectedComplaints();
 
     expect(await screen.findByText(COPY.complaintsEmpty)).toBeInTheDocument();
   });
 
   it("shows a load error when the API fails", async () => {
+    authenticateTestUser();
     setListFailure(true);
-
-    render(
-      <MemoryRouter initialEntries={["/complaints"]}>
-        <Routes>
-          <Route path="/complaints" element={<ComplaintsListPage />} />
-        </Routes>
-      </MemoryRouter>,
-    );
+    renderProtectedComplaints();
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       COPY.complaintsLoadError,
@@ -38,6 +73,7 @@ describe("ComplaintsListPage", () => {
   });
 
   it("renders complaints returned by the fake backend", async () => {
+    authenticateTestUser();
     server.use(
       http.get("/api/complaints", () =>
         HttpResponse.json([
@@ -53,13 +89,7 @@ describe("ComplaintsListPage", () => {
       ),
     );
 
-    render(
-      <MemoryRouter initialEntries={["/complaints"]}>
-        <Routes>
-          <Route path="/complaints" element={<ComplaintsListPage />} />
-        </Routes>
-      </MemoryRouter>,
-    );
+    renderProtectedComplaints();
 
     expect(await screen.findByText("Jane Doe")).toBeInTheDocument();
     expect(
@@ -67,7 +97,7 @@ describe("ComplaintsListPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows a submitted complaint after navigating from the form", async () => {
+  it("shows a submitted complaint after login and navigation", async () => {
     const user = userEvent.setup();
 
     render(
@@ -76,13 +106,12 @@ describe("ComplaintsListPage", () => {
       </MemoryRouter>,
     );
 
-    await user.type(screen.getByLabelText(COPY.nameLabel), "Jane Doe");
-    await user.type(screen.getByLabelText(COPY.emailLabel), "jane@example.com");
-    await user.selectOptions(screen.getByLabelText(COPY.categoryLabel), "bug");
-    await user.type(
-      screen.getByLabelText(COPY.messageLabel),
-      "The submit button does not work on mobile.",
-    );
+    await fillFeedbackForm(user, screen, {
+      name: "Jane Doe",
+      email: "jane@example.com",
+      categoryLabel: "Bug",
+      message: "The submit button does not work on mobile.",
+    });
     await user.click(screen.getByRole("button", { name: COPY.submitButton }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       COPY.successMessage,
@@ -90,13 +119,63 @@ describe("ComplaintsListPage", () => {
 
     await user.click(
       within(screen.getByRole("navigation")).getByRole("link", {
-        name: COPY.nav.complaints,
+        name: COPY.nav.login,
       }),
     );
+    await loginThroughUi(user, screen, MOCK_ADMIN_USERNAME, MOCK_ADMIN_PASSWORD);
+    expect(
+      await screen.findByRole("heading", { name: COPY.complaintsPageTitle }),
+    ).toBeInTheDocument();
 
     expect(await screen.findByText("Jane Doe")).toBeInTheDocument();
     expect(
       screen.getByText("The submit button does not work on mobile."),
     ).toBeInTheDocument();
+  });
+});
+
+describe("LoginPage", () => {
+  beforeEach(() => {
+    clearAuthenticatedUser();
+    setLoginFailure(false);
+  });
+
+  it("shows invalid credentials message", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    await loginThroughUi(user, screen, MOCK_ADMIN_USERNAME, "wrong-password");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(COPY.loginError);
+  });
+
+  it("shows a server error when login fails", async () => {
+    setLoginFailure(true);
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    await loginThroughUi(user, screen, MOCK_ADMIN_USERNAME, MOCK_ADMIN_PASSWORD);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      COPY.loginServerError,
+    );
   });
 });

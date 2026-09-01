@@ -1,5 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
+import { authApp } from "./routes/auth.js";
+import { categoriesApp } from "./routes/categories.js";
 import { complaintsApp } from "./routes/complaints.js";
 
 export function createApp() {
@@ -12,6 +14,8 @@ export function createApp() {
     }),
   );
 
+  app.route("/", authApp);
+  app.route("/", categoriesApp);
   app.route("/", complaintsApp);
 
   app.doc("/openapi.json", {
@@ -20,6 +24,15 @@ export function createApp() {
       title: "Feedback Sandbox API",
       version: "1.0.0",
       description: "Complaint submission and listing for the feedback sandbox.",
+    },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
     },
   });
 

@@ -135,3 +135,12 @@ button:disabled {
 a.active {
   font-weight: 700;
 }
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #1f4fd6;
+  cursor: pointer;
+  font: inherit;
+}

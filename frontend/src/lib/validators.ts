@@ -1,17 +1,3 @@
-export const COMPLAINT_CATEGORIES = [
-  "bug",
-  "feature_request",
-  "other",
-] as const;
-
-export type ComplaintCategory = (typeof COMPLAINT_CATEGORIES)[number];
-
-export const CATEGORY_LABELS: Record<ComplaintCategory, string> = {
-  bug: "Bug",
-  feature_request: "Feature Request",
-  other: "Other",
-};
-
 export const COPY = {
   formTitle: "Send feedback",
   nameLabel: "Name",
@@ -21,6 +7,7 @@ export const COPY = {
   submitButton: "Submit feedback",
   successMessage: "Thank you! Your feedback has been received.",
   serverErrorMessage: "Something went wrong. Please try again.",
+  categoriesLoadError: "Could not load categories. Please try again.",
   validation: {
     nameRequired: "Name is required.",
     emailRequired: "Email is required.",
@@ -33,16 +20,24 @@ export const COPY = {
   complaintsPageTitle: "All complaints",
   complaintsEmpty: "No complaints yet.",
   complaintsLoadError: "Could not load complaints. Please try again.",
+  loginTitle: "Sign in",
+  usernameLabel: "Username",
+  passwordLabel: "Password",
+  loginButton: "Sign in",
+  loginError: "Invalid username or password.",
+  loginServerError: "Could not sign in. Please try again.",
   nav: {
     feedback: "Send feedback",
     complaints: "View complaints",
+    login: "Sign in",
+    logout: "Sign out",
   },
 } as const;
 
 export interface ComplaintFormValues {
   name: string;
   email: string;
-  category: ComplaintCategory | "";
+  category: string;
   message: string;
 }
 

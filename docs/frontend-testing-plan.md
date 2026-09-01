@@ -10,10 +10,11 @@ CI — without hand-waving. The app is throwaway. The plumbing is not.
 
 ## The feature under test
 
-1. **Submit feedback** — name, email, category, message.
-2. **View complaints** — list everything the backend has stored.
+1. **Submit feedback** — name, email, category (from API), message.
+2. **Sign in** — username/password, JWT stored in localStorage.
+3. **View complaints** — protected list of everything stored.
 
-Both flows share one API contract (`backend/openapi.json`).
+All flows share one API contract (`backend/openapi.json`).
 
 ## The three layers
 
@@ -37,7 +38,8 @@ Each behavior lives in exactly one layer.
 - Location: `frontend/tests/feature/`
 - Uses Testing Library + Vitest + MSW.
 - Fake backend: `frontend/tests/mocks/handlers.ts`
-- Covers success and forced error paths.
+- Covers success and forced error paths (categories, login, submit, list).
+- Use `authenticateTestUser()` for fast auth; one test logs in through the UI.
 - This is where most coverage should live.
 
 ### E2e
@@ -45,7 +47,7 @@ Each behavior lives in exactly one layer.
 - Location: `frontend/tests/e2e/`
 - Uses Playwright with the real backend and real SQLite.
 - Keep this to one critical flow:
-  submit feedback → see success → open complaints page → see the new row.
+  submit feedback → sign in → open complaints page → see the new row.
 
 ## The contract bridge
 

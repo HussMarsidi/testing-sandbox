@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
-import { fetchComplaints, formatCategory, formatDate } from "../lib/api";
-import type { Complaint } from "../lib/api";
+import { useCategories } from "../context/CategoriesContext";
+import {
+  fetchComplaints,
+  getCategoryLabel,
+  formatDate,
+  type Complaint,
+} from "../lib/api";
 import { COPY } from "../lib/validators";
 
 export function ComplaintsListPage() {
+  const { categories } = useCategories();
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +67,7 @@ export function ComplaintsListPage() {
               <div className="complaint-meta">
                 <strong>{complaint.name}</strong>
                 <span>{complaint.email}</span>
-                <span>{formatCategory(complaint.category)}</span>
+                <span>{getCategoryLabel(categories, complaint.category)}</span>
                 <span>{formatDate(complaint.created_at)}</span>
               </div>
               <p>{complaint.message}</p>

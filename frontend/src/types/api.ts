@@ -4,6 +4,111 @@
  */
 
 export interface paths {
+    "/api/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign in with username and password */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["LoginRequest"];
+                };
+            };
+            responses: {
+                /** @description Signed in successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LoginResponse"];
+                    };
+                };
+                /** @description Invalid credentials */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Login failed */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List complaint categories */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Available complaint categories */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CategoryOption"][];
+                    };
+                };
+                /** @description Failed to load categories */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            error: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/complaints": {
         parameters: {
             query?: never;
@@ -28,6 +133,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["Complaint"][];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
                 /** @description Failed to list complaints */
@@ -95,6 +209,33 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        LoginResponse: {
+            /** @example jwt-token */
+            token: string;
+        };
+        ErrorResponse: {
+            /** @example Validation failed */
+            error: string;
+            details?: {
+                field: string;
+                message: string;
+            }[];
+        };
+        LoginRequest: {
+            /** @example admin */
+            username: string;
+            /** @example password */
+            password: string;
+        };
+        CategoryOption: {
+            /**
+             * @example bug
+             * @enum {string}
+             */
+            value: "bug" | "feature_request" | "other";
+            /** @example Bug */
+            label: string;
+        };
         Complaint: {
             /** @example 1 */
             id: number;
@@ -114,14 +255,6 @@ export interface components {
             message: string;
             /** @example 2026-09-01T12:00:00.000Z */
             created_at: string;
-        };
-        ErrorResponse: {
-            /** @example Validation failed */
-            error: string;
-            details?: {
-                field: string;
-                message: string;
-            }[];
         };
         CreateComplaintResponse: {
             /** @example 1 */

@@ -1,16 +1,15 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
-import type { ComplaintCategory } from "../lib/validators";
+import { createComplaint } from "../lib/api";
+import { useCategories } from "../context/CategoriesContext";
 import {
-  CATEGORY_LABELS,
-  COMPLAINT_CATEGORIES,
   COPY,
   getFieldError,
   validateComplaintForm,
   type ComplaintFormValues,
   type FieldError,
 } from "../lib/validators";
-import { createComplaint } from "../lib/api";
+import type { CreateComplaint } from "../lib/api";
 
 const initialValues: ComplaintFormValues = {
   name: "",
@@ -20,16 +19,24 @@ const initialValues: ComplaintFormValues = {
 };
 
 export function FeedbackForm() {
+  const { categories, isLoading, error: categoriesError } = useCategories();
   const [values, setValues] = useState<ComplaintFormValues>(initialValues);
   const [errors, setErrors] = useState<FieldError[]>([]);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const categoriesUnavailable = Boolean(categoriesError);
+  const formDisabled = isLoading || categoriesUnavailable || isSubmitting;
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setServerError(null);
     setSuccessMessage(null);
+
+    if (categoriesUnavailable) {
+      return;
+    }
 
     const validation = validateComplaintForm(values);
     setErrors(validation.errors);
@@ -44,7 +51,7 @@ export function FeedbackForm() {
       await createComplaint({
         name: values.name.trim(),
         email: values.email.trim(),
-        category: values.category,
+        category: values.category as CreateComplaint["category"],
         message: values.message.trim(),
       });
 
@@ -81,12 +88,19 @@ export function FeedbackForm() {
         </p>
       ) : null}
 
+      {categoriesUnavailable ? (
+        <p role="alert" className="banner error">
+          {COPY.categoriesLoadError}
+        </p>
+      ) : null}
+
       <form onSubmit={handleSubmit} noValidate>
         <label htmlFor="name">{COPY.nameLabel}</label>
         <input
           id="name"
           name="name"
           value={values.name}
+          disabled={formDisabled}
           onChange={(event) => updateField("name", event.target.value)}
           aria-invalid={Boolean(getFieldError(errors, "name"))}
           aria-describedby={getFieldError(errors, "name") ? "name-error" : undefined}
@@ -103,6 +117,7 @@ export function FeedbackForm() {
           name="email"
           type="email"
           value={values.email}
+          disabled={formDisabled}
           onChange={(event) => updateField("email", event.target.value)}
           aria-invalid={Boolean(getFieldError(errors, "email"))}
           aria-describedby={getFieldError(errors, "email") ? "email-error" : undefined}
@@ -118,18 +133,19 @@ export function FeedbackForm() {
           id="category"
           name="category"
           value={values.category}
-          onChange={(event) =>
-            updateField("category", event.target.value as ComplaintCategory | "")
-          }
+          disabled={formDisabled}
+          onChange={(event) => updateField("category", event.target.value)}
           aria-invalid={Boolean(getFieldError(errors, "category"))}
           aria-describedby={
             getFieldError(errors, "category") ? "category-error" : undefined
           }
         >
-          <option value="">Select a category</option>
-          {COMPLAINT_CATEGORIES.map((category) => (
-            <option key={category} value={category}>
-              {CATEGORY_LABELS[category]}
+          <option value="">
+            {isLoading ? "Loading categories..." : "Select a category"}
+          </option>
+          {categories.map((category) => (
+            <option key={category.value} value={category.value}>
+              {category.label}
             </option>
           ))}
         </select>
@@ -145,6 +161,7 @@ export function FeedbackForm() {
           name="message"
           rows={5}
           value={values.message}
+          disabled={formDisabled}
           onChange={(event) => updateField("message", event.target.value)}
           aria-invalid={Boolean(getFieldError(errors, "message"))}
           aria-describedby={
@@ -157,7 +174,7 @@ export function FeedbackForm() {
           </p>
         ) : null}
 
-        <button type="submit" disabled={isSubmitting}>
+        <button type="submit" disabled={formDisabled}>
           {COPY.submitButton}
         </button>
       </form>

@@ -7,6 +7,89 @@
   },
   "components": {
     "schemas": {
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "jwt-token"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Validation failed"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "field",
+                "message"
+              ]
+            }
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "example": "admin"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "example": "password"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "CategoryOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "enum": [
+              "bug",
+              "feature_request",
+              "other"
+            ],
+            "example": "bug"
+          },
+          "label": {
+            "type": "string",
+            "example": "Bug"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ]
+      },
       "Complaint": {
         "type": "object",
         "properties": {
@@ -50,36 +133,6 @@
           "category",
           "message",
           "created_at"
-        ]
-      },
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "string",
-            "example": "Validation failed"
-          },
-          "details": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "field": {
-                  "type": "string"
-                },
-                "message": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "field",
-                "message"
-              ]
-            }
-          }
-        },
-        "required": [
-          "error"
         ]
       },
       "CreateComplaintResponse": {
@@ -138,12 +191,107 @@
     "parameters": {}
   },
   "paths": {
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Sign in with username and password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signed in successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Login failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "List complaint categories",
+        "responses": {
+          "200": {
+            "description": "Available complaint categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryOption"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to load categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/complaints": {
       "get": {
         "tags": [
           "Complaints"
         ],
         "summary": "List all complaints",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "All complaints, newest first",
@@ -154,6 +302,16 @@
                   "items": {
                     "$ref": "#/components/schemas/Complaint"
                   }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
