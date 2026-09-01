@@ -1,13 +1,12 @@
 # Feedback Sandbox
 
-A small throwaway project to prove our **frontend testing plan** works from end
-to end — *before* we use it on the real codebase.
+A small throwaway project for exploring **frontend testing** — unit, feature,
+and e2e layers, a shared API contract, and CI — on a minimal real app.
 
-The app itself does not matter. The plumbing does. So we build the smallest
-feature that still touches every part of the plan: feedback submission, a
-complaints list, every test layer, and one CI gate.
+The app itself is simple (feedback form, login, complaints list). The testing
+setup around it is the point.
 
-> Full testing plan: see [`docs/frontend-testing-plan.md`](docs/frontend-testing-plan.md).
+> How testing works in this repo: [`docs/frontend-testing.md`](docs/frontend-testing.md).
 
 ---
 
@@ -170,6 +169,6 @@ feedback-sandbox/
 │           └── handlers.ts     the fake backend (MSW)
 │
 ├── docs/
-│   └── frontend-testing-plan.md
+│   └── frontend-testing.md
 └── .github/workflows/ci.yml    the one gate
 ```
