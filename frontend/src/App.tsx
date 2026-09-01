@@ -1,11 +1,14 @@
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Link, NavLink, Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { CategoriesProvider } from "./context/CategoriesContext";
 import { FeedbackForm } from "./components/FeedbackForm";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ComplaintsListPage } from "./pages/ComplaintsListPage";
 import { LoginPage } from "./pages/LoginPage";
+import { createQueryClient } from "./lib/query-client";
 import { COPY } from "./lib/validators";
+
+const queryClient = createQueryClient();
 
 function AppShell() {
   const { isAuthenticated, logout } = useAuth();
@@ -59,10 +62,10 @@ function AppShell() {
 
 export function App() {
   return (
-    <AuthProvider>
-      <CategoriesProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
         <AppShell />
-      </CategoriesProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

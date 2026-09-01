@@ -1,14 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it } from "vitest";
 import { App } from "../../src/App";
-import { ProtectedRoute } from "../../src/components/ProtectedRoute";
-import { AuthProvider } from "../../src/context/AuthContext";
-import { CategoriesProvider } from "../../src/context/CategoriesContext";
-import { ComplaintsListPage } from "../../src/pages/ComplaintsListPage";
-import { LoginPage } from "../../src/pages/LoginPage";
 import { COPY } from "../../src/lib/validators";
 import {
   MOCK_ADMIN_PASSWORD,
@@ -19,28 +14,10 @@ import {
 } from "../mocks/handlers";
 import { authenticateTestUser, clearAuthenticatedUser } from "../helpers/auth";
 import { fillFeedbackForm, loginThroughUi } from "../helpers/form";
-
-function renderProtectedComplaints(initialEntry = "/complaints") {
-  return render(
-    <MemoryRouter initialEntries={[initialEntry]}>
-      <AuthProvider>
-        <CategoriesProvider>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route
-              path="/complaints"
-              element={
-                <ProtectedRoute>
-                  <ComplaintsListPage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </CategoriesProvider>
-      </AuthProvider>
-    </MemoryRouter>,
-  );
-}
+import {
+  renderLoginPage,
+  renderProtectedComplaints,
+} from "../helpers/render";
 
 describe("ComplaintsListPage", () => {
   beforeEach(() => {
@@ -143,15 +120,7 @@ describe("LoginPage", () => {
   it("shows invalid credentials message", async () => {
     const user = userEvent.setup();
 
-    render(
-      <MemoryRouter initialEntries={["/login"]}>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-          </Routes>
-        </AuthProvider>
-      </MemoryRouter>,
-    );
+    renderLoginPage();
 
     await loginThroughUi(user, screen, MOCK_ADMIN_USERNAME, "wrong-password");
 
@@ -162,15 +131,7 @@ describe("LoginPage", () => {
     setLoginFailure(true);
     const user = userEvent.setup();
 
-    render(
-      <MemoryRouter initialEntries={["/login"]}>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-          </Routes>
-        </AuthProvider>
-      </MemoryRouter>,
-    );
+    renderLoginPage();
 
     await loginThroughUi(user, screen, MOCK_ADMIN_USERNAME, MOCK_ADMIN_PASSWORD);
 

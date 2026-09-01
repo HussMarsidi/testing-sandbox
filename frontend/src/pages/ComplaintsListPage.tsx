@@ -1,48 +1,10 @@
-import { useEffect, useState } from "react";
-import { useCategories } from "../context/CategoriesContext";
-import {
-  fetchComplaints,
-  getCategoryLabel,
-  formatDate,
-  type Complaint,
-} from "../lib/api";
+import { useCategories, useComplaints } from "../lib/queries";
+import { getCategoryLabel, formatDate } from "../lib/api";
 import { COPY } from "../lib/validators";
 
 export function ComplaintsListPage() {
   const { categories } = useCategories();
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadComplaints() {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const data = await fetchComplaints();
-        if (!cancelled) {
-          setComplaints(data);
-        }
-      } catch {
-        if (!cancelled) {
-          setError(COPY.complaintsLoadError);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    void loadComplaints();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { complaints, isLoading, error } = useComplaints();
 
   return (
     <section className="card">

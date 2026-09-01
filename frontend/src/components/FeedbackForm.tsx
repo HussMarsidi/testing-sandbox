@@ -1,7 +1,7 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { createComplaint } from "../lib/api";
-import { useCategories } from "../context/CategoriesContext";
+import { useCategories } from "../lib/queries";
 import {
   COPY,
   getFieldError,

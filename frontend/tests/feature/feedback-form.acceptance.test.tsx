@@ -1,21 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
-import { CategoriesProvider } from "../../src/context/CategoriesContext";
 import { FeedbackForm } from "../../src/components/FeedbackForm";
 import { COPY } from "../../src/lib/validators";
 import { setCategoriesFailure, setCreateFailure } from "../mocks/handlers";
 import { waitForCategories } from "../helpers/auth";
+import { renderWithProviders } from "../helpers/render";
 
 function renderForm() {
-  return render(
-    <MemoryRouter>
-      <CategoriesProvider>
-        <FeedbackForm />
-      </CategoriesProvider>
-    </MemoryRouter>,
-  );
+  return renderWithProviders(<FeedbackForm />);
 }
 
 describe("FeedbackForm acceptance", () => {
