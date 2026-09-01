@@ -30,6 +30,15 @@ export interface paths {
                         "application/json": components["schemas"]["Complaint"][];
                     };
                 };
+                /** @description Failed to list complaints */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
             };
         };
         put?: never;
@@ -58,6 +67,15 @@ export interface paths {
                 };
                 /** @description Validation failed */
                 400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Failed to submit complaint */
+                500: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -97,10 +115,6 @@ export interface components {
             /** @example 2026-09-01T12:00:00.000Z */
             created_at: string;
         };
-        CreateComplaintResponse: {
-            /** @example 1 */
-            id: number;
-        };
         ErrorResponse: {
             /** @example Validation failed */
             error: string;
@@ -108,6 +122,10 @@ export interface components {
                 field: string;
                 message: string;
             }[];
+        };
+        CreateComplaintResponse: {
+            /** @example 1 */
+            id: number;
         };
         CreateComplaint: {
             /** @example Jane Doe */

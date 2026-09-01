@@ -52,20 +52,6 @@
           "created_at"
         ]
       },
-      "CreateComplaintResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "example": 1
-          }
-        },
-        "required": [
-          "id"
-        ]
-      },
       "ErrorResponse": {
         "type": "object",
         "properties": {
@@ -94,6 +80,20 @@
         },
         "required": [
           "error"
+        ]
+      },
+      "CreateComplaintResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "example": 1
+          }
+        },
+        "required": [
+          "id"
         ]
       },
       "CreateComplaint": {
@@ -157,6 +157,16 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Failed to list complaints",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -187,6 +197,16 @@
           },
           "400": {
             "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to submit complaint",
             "content": {
               "application/json": {
                 "schema": {

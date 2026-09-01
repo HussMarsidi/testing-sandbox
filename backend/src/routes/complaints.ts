@@ -21,6 +21,14 @@ const listComplaintsRoute = createRoute({
         },
       },
     },
+    500: {
+      description: "Failed to list complaints",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
   },
 });
 
@@ -55,18 +63,37 @@ const createComplaintRoute = createRoute({
         },
       },
     },
+    500: {
+      description: "Failed to submit complaint",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
   },
 });
 
 export const complaintsApp = new OpenAPIHono();
 
 complaintsApp.openapi(listComplaintsRoute, (c) => {
-  const complaints = listComplaints();
-  return c.json(complaints, 200);
+  try {
+    const complaints = listComplaints();
+    return c.json(complaints, 200);
+  } catch (error) {
+    console.error("List complaints failed", error);
+    return c.json({ error: "Failed to list complaints" }, 500);
+  }
 });
 
 complaintsApp.openapi(createComplaintRoute, (c) => {
   const body = c.req.valid("json");
-  const complaint = insertComplaint(body);
-  return c.json({ id: complaint.id }, 201);
+  try {
+    const complaint = insertComplaint(body);
+    console.log("Create complaint successful", complaint.id);
+    return c.json({ id: complaint.id }, 201);
+  } catch (error) {
+    console.error("Create complaint failed", error);
+    return c.json({ error: "Failed to submit complaint" }, 500);
+  }
 });
