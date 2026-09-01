@@ -6,7 +6,8 @@ and e2e layers, a shared API contract, and CI — on a minimal real app.
 The app itself is simple (feedback form, login, complaints list). The testing
 setup around it is the point.
 
-> How testing works in this repo: [`docs/frontend-testing.md`](docs/frontend-testing.md).
+> How testing works in this repo: [`docs/frontend-testing.md`](docs/frontend-testing.md).  
+> Why mocks are not the whole story: [`docs/testing-faq.md`](docs/testing-faq.md).
 
 ---
 
@@ -63,7 +64,7 @@ Each behavior lives in **exactly one** layer.
 - **Unit** — pure logic. A value in, a value out. No UI, no backend.
   → `frontend/tests/unit/` (targets `src/lib/validators.ts`)
 - **Feature** — the default, and the bulk. Real form, **fake** backend.
-  Act like a user; check what shows on screen. Covers success *and* error.
+  Act like a user; check what shows on screen. Covers success _and_ error.
   → `frontend/tests/feature/` (fake backend lives in `tests/mocks/handlers.ts`)
 - **E2e** — one critical flow only. Real browser, **real** backend.
   → `frontend/tests/e2e/`
@@ -76,7 +77,7 @@ the tests fast and lets us force error cases on demand.
 ## The bridge (the contract)
 
 1. The backend describes its API in one standard file — the **OpenAPI spec**.
-   With Hono + Zod, that spec is built from the *same rules* that check incoming
+   With Hono + Zod, that spec is built from the _same rules_ that check incoming
    requests, so the spec can't lie about what the backend does.
 2. That spec is **committed to the repo** as `backend/openapi.json`. It is the
    contract. When the API changes, this file changes — and shows up as a diff in
@@ -114,7 +115,7 @@ AI writes a lot of the code, so AI must not be allowed to mark its own homework.
 3. AI may draft more tests. A human skims them: real behavior, or just agreeing
    with the code?
 
-Only the human-written acceptance test is *trusted*. AI-drafted tests add
+Only the human-written acceptance test is _trusted_. AI-drafted tests add
 coverage, not trust.
 
 For this POC, the visible copy lives in `frontend/src/lib/validators.ts` as
@@ -173,6 +174,7 @@ feedback-sandbox/
 │           └── handlers.ts     the fake backend (MSW)
 │
 ├── docs/
-│   └── frontend-testing.md
+│   ├── frontend-testing.md
+│   └── testing-faq.md
 └── .github/workflows/ci.yml    the one gate
 ```

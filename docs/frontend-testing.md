@@ -9,6 +9,9 @@ each layer exists. If you want to follow along, skip to [Try it yourself](#try-i
 and run the commands — then come back here when something breaks or you are not
 sure where a test should live.
 
+Common pushback (“if we mock, we are not testing the feature”) lives in
+[testing-faq.md](./testing-faq.md).
+
 ---
 
 ## The pyramid (what we actually have)
@@ -96,7 +99,7 @@ Do not unit test things that only make sense with UI or I/O wired up:
   where MSW handles HTTP.
 - **Do not** duplicate every validation rule twice (unit asserts the message,
   feature asserts the same message on screen). Pick both only when the rule is
-  easy to break in isolation *and* the wiring matters — e.g. trim before validate.
+  easy to break in isolation _and_ the wiring matters — e.g. trim before validate.
 
 We only have one unit file right now because most of the app is UI + network.
 That is normal for a form-heavy frontend.
@@ -130,10 +133,10 @@ reads it back (with a Bearer token check).
 Toggle helpers flip error modes without touching production code:
 
 ```ts
-setCategoriesFailure(true);  // GET /api/categories → 500
-setCreateFailure(true);      // POST /api/complaints → 500
-setListFailure(true);        // GET /api/complaints → 500
-setLoginFailure(true);       // POST /api/auth/login → 500
+setCategoriesFailure(true); // GET /api/categories → 500
+setCreateFailure(true); // POST /api/complaints → 500
+setListFailure(true); // GET /api/complaints → 500
+setLoginFailure(true); // POST /api/auth/login → 500
 ```
 
 `setup-msw.ts` calls `resetMockState()` after every test so complaints from one
@@ -167,23 +170,23 @@ one chain.
 
 **`feedback-form.acceptance.test.tsx`**
 
-| Test | What it does |
-|------|----------------|
+| Test              | What it does                                                                    |
+| ----------------- | ------------------------------------------------------------------------------- |
 | Labels and button | Renders form, checks `COPY` strings, waits for "Bug" option (categories loaded) |
-| Validation | Clicks submit with empty fields, expects four inline error messages |
-| Success | Fills form, submits, expects `role="status"` success banner |
-| Server error | `setCreateFailure(true)`, submit valid form, expects alert with server message |
-| Categories down | `setCategoriesFailure(true)`, expects error banner + disabled submit |
+| Validation        | Clicks submit with empty fields, expects four inline error messages             |
+| Success           | Fills form, submits, expects `role="status"` success banner                     |
+| Server error      | `setCreateFailure(true)`, submit valid form, expects alert with server message  |
+| Categories down   | `setCategoriesFailure(true)`, expects error banner + disabled submit            |
 
 **`complaints-list.test.tsx`**
 
-| Test | What it does |
-|------|----------------|
-| Not authed | Visit `/complaints`, redirected to login heading |
-| Empty list | Token in localStorage, MSW returns `[]`, shows empty copy |
-| Load error | `setListFailure(true)`, shows complaints load error alert |
+| Test        | What it does                                                            |
+| ----------- | ----------------------------------------------------------------------- |
+| Not authed  | Visit `/complaints`, redirected to login heading                        |
+| Empty list  | Token in localStorage, MSW returns `[]`, shows empty copy               |
+| Load error  | `setListFailure(true)`, shows complaints load error alert               |
 | Custom data | `server.use()` overrides GET handler for one test with a hard-coded row |
-| Full flow | Submit on `/`, login via UI, see complaint on list |
+| Full flow   | Submit on `/`, login via UI, see complaint on list                      |
 
 ### What belongs here
 
@@ -233,7 +236,7 @@ fill form → submit → click Sign in → log in as `admin` / `password` → op
 complaints → find a list item containing a unique message string
 (`E2E complaint at ${Date.now()}`).
 
-That timestamp matters. It proves the row came from *this* run, not leftover data
+That timestamp matters. It proves the row came from _this_ run, not leftover data
 (though e2e DB is separate from dev either way).
 
 ### What e2e catches that feature tests miss
@@ -272,7 +275,7 @@ We fix that with a generated spec and generated types.
 **Backend side**
 
 Routes are defined with Zod schemas in Hono (`@hono/zod-openapi`). The same
-schemas validate incoming requests *and* describe the API shape. Running:
+schemas validate incoming requests _and_ describe the API shape. Running:
 
 ```bash
 cd backend && npm run generate:openapi
