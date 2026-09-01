@@ -1,7 +1,8 @@
-import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
 import { sign } from "hono/jwt";
 import { getJwtSecret } from "../auth.js";
 import { verifyUserCredentials } from "../db.js";
+import { createOpenAPIApp } from "../openapi-app.js";
 import {
   ErrorResponseSchema,
   LoginRequestSchema,
@@ -50,7 +51,7 @@ const loginRoute = createRoute({
   },
 });
 
-export const authApp = new OpenAPIHono();
+export const authApp = createOpenAPIApp();
 
 authApp.openapi(loginRoute, async (c) => {
   const body = c.req.valid("json");
@@ -64,12 +65,13 @@ authApp.openapi(loginRoute, async (c) => {
     const token = await sign(
       {
         sub: user.username,
+        role: user.role,
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 8,
       },
       getJwtSecret(),
     );
 
-    return c.json({ token }, 200);
+    return c.json({ token, role: user.role }, 200);
   } catch (error) {
     console.error("Login failed", error);
     return c.json({ error: "Failed to sign in" }, 500);

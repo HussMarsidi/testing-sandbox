@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes, type MemoryRouterProps } from "react-route
 import { AuthProvider } from "../../src/context/AuthContext";
 import { ProtectedRoute } from "../../src/components/ProtectedRoute";
 import { createQueryClient } from "../../src/lib/query-client";
+import { ComplaintDetailPage } from "../../src/pages/ComplaintDetailPage";
 import { ComplaintsListPage } from "../../src/pages/ComplaintsListPage";
 import { LoginPage } from "../../src/pages/LoginPage";
 
@@ -34,20 +35,34 @@ export function renderWithProviders(
   });
 }
 
+function complaintsRoutes() {
+  return (
+    <>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/complaints"
+        element={
+          <ProtectedRoute>
+            <ComplaintsListPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/complaints/:id"
+        element={
+          <ProtectedRoute>
+            <ComplaintDetailPage />
+          </ProtectedRoute>
+        }
+      />
+    </>
+  );
+}
+
 export function renderProtectedComplaints(initialEntry = "/complaints") {
   return renderWithProviders(
     <AuthProvider>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/complaints"
-          element={
-            <ProtectedRoute>
-              <ComplaintsListPage />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+      <Routes>{complaintsRoutes()}</Routes>
     </AuthProvider>,
     { initialEntries: [initialEntry] },
   );

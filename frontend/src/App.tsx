@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { FeedbackForm } from "./components/FeedbackForm";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ComplaintsListPage } from "./pages/ComplaintsListPage";
+import { ComplaintDetailPage } from "./pages/ComplaintDetailPage";
 import { LoginPage } from "./pages/LoginPage";
 import { createQueryClient } from "./lib/query-client";
 import { COPY } from "./lib/validators";
@@ -43,6 +44,14 @@ function AppShell() {
             element={
               <ProtectedRoute>
                 <ComplaintsListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/complaints/:id"
+            element={
+              <ProtectedRoute>
+                <ComplaintDetailPage />
               </ProtectedRoute>
             }
           />

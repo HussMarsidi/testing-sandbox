@@ -1,5 +1,7 @@
 export const AUTH_TOKEN_KEY = "feedback_sandbox_token";
 
+export type UserRole = "admin" | "viewer";
+
 export function getAuthToken(): string | null {
   return localStorage.getItem(AUTH_TOKEN_KEY);
 }

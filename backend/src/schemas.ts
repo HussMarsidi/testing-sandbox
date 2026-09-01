@@ -1,9 +1,16 @@
 import { z } from "@hono/zod-openapi";
 import { COMPLAINT_CATEGORIES } from "./db.js";
+import { COMPLAINT_STATUSES } from "./status.js";
 
 export const ComplaintCategorySchema = z
   .enum(COMPLAINT_CATEGORIES)
   .openapi({ example: "bug" });
+
+export const ComplaintStatusSchema = z
+  .enum(COMPLAINT_STATUSES)
+  .openapi({ example: "open" });
+
+export const UserRoleSchema = z.enum(["admin", "viewer"]).openapi({ example: "admin" });
 
 export const CategoryOptionSchema = z
   .object({
@@ -30,9 +37,21 @@ export const ComplaintSchema = z
     email: z.string().email().openapi({ example: "jane@example.com" }),
     category: ComplaintCategorySchema,
     message: z.string().openapi({ example: "The submit button does not work on mobile." }),
+    status: ComplaintStatusSchema,
     created_at: z.string().openapi({ example: "2026-09-01T12:00:00.000Z" }),
   })
   .openapi("Complaint");
+
+export const UpdateComplaintStatusSchema = z
+  .object({
+    status: ComplaintStatusSchema,
+  })
+  .openapi("UpdateComplaintStatus");
+
+export const ComplaintListQuerySchema = z.object({
+  status: ComplaintStatusSchema.optional(),
+  search: z.string().trim().min(1).optional(),
+});
 
 export const CreateComplaintResponseSchema = z
   .object({
@@ -50,6 +69,7 @@ export const LoginRequestSchema = z
 export const LoginResponseSchema = z
   .object({
     token: z.string().openapi({ example: "jwt-token" }),
+    role: UserRoleSchema,
   })
   .openapi("LoginResponse");
 
@@ -66,3 +86,7 @@ export const ErrorResponseSchema = z
       .optional(),
   })
   .openapi("ErrorResponse");
+
+export const ComplaintIdParamSchema = z.object({
+  id: z.coerce.number().int().positive().openapi({ example: 1 }),
+});

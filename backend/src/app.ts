@@ -1,11 +1,11 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
+import { createOpenAPIApp } from "./openapi-app.js";
 import { authApp } from "./routes/auth.js";
 import { categoriesApp } from "./routes/categories.js";
 import { complaintsApp } from "./routes/complaints.js";
 
 export function createApp() {
-  const app = new OpenAPIHono();
+  const app = createOpenAPIApp();
 
   app.use(
     "*",

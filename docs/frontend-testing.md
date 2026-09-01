@@ -1,7 +1,8 @@
 # Frontend testing in this repo
 
-We have a tiny feedback app: submit a form, log in, see the list. The app is
-not the point. The tests are.
+We have a feedback app with enough moving parts to practice real testing tradeoffs:
+roles, status workflow, filters, detail pages, OpenAPI contract checks, smoke vs
+nightly e2e. The app is not the point. The tests are.
 
 This doc walks through what we actually run, what files are involved, and why
 each layer exists. If you want to follow along, skip to [Try it yourself](#try-it-yourself)
@@ -17,28 +18,27 @@ you go up.
 
 ```
                     ┌──────────────────────────────────────┐
-                    │  E2E — 1 test                        │
-                    │  Playwright · Chromium               │
-                    │  real Vite dev server + real Hono    │
+                    │  E2E smoke — 1 test (PR CI)          │
+                    │  E2E regression — 2 tests (nightly)  │
+                    │  Playwright · Chromium · real stack  │
                     └──────────────────────────────────────┘
               ┌────────────────────────────────────────────────────┐
-              │  Feature — 12 tests                                │
+              │  Feature — 16 tests                                │
               │  Vitest · jsdom · Testing Library · MSW            │
-              │  HTTP faked, React is real                        │
               └────────────────────────────────────────────────────┘
     ┌──────────────────────────────────────────────────────────────────────────┐
-    │  Unit — 3 tests                                                          │
-    │  validateComplaintForm() only                                            │
-    │  no DOM, no React, no network                                            │
+    │  Unit — 6 tests (frontend) + 13 backend API/status tests               │
     └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Unit** — `frontend/tests/unit/validators.test.ts`  
+**Unit** — `frontend/tests/unit/` + `backend/tests/`  
 **Feature** — `frontend/tests/feature/*.test.tsx`  
-**E2E** — `frontend/tests/e2e/feedback-flow.spec.ts`
+**E2E smoke** — `frontend/tests/e2e/smoke/` (every PR)  
+**E2E regression** — `frontend/tests/e2e/regression/` (nightly workflow)  
+**Contract** — Schemathesis against live Hono + `openapi.json` (`backend npm run test:contract`)
 
-Vitest runs unit + feature together (`npm test`). Playwright runs e2e separately
-(`npm run test:e2e`) because it has to boot two servers first.
+Vitest runs frontend unit + feature (`npm test`). Playwright smoke runs on PR CI
+(`npm run test:e2e`). Regression runs nightly (`npm run test:e2e:regression`).
 
 ---
 
@@ -337,19 +337,32 @@ Single file:
 cd frontend && npx vitest run tests/feature/complaints-list.test.tsx
 ```
 
-### E2E
+### E2E smoke (PR CI)
 
 ```bash
 cd frontend && npm run test:e2e
 ```
 
-First run may install Chromium. Playwright starts backend + frontend for you.
+Runs `tests/e2e/smoke/` — one critical happy path.
 
-Watch it run in a visible browser:
+### E2E regression (nightly)
 
 ```bash
-cd frontend && npx playwright test --headed
+cd frontend && npm run test:e2e:regression
 ```
+
+Runs `tests/e2e/regression/` — viewer read-only + admin status update on the real
+stack. Same Playwright server boot as smoke.
+
+### Backend + contract tests
+
+```bash
+cd backend && npm test
+cd backend && npm run test:contract
+```
+
+Backend tests hit the real Hono app in-process. Contract tests run Schemathesis
+against a live server and verify responses match `openapi.json`.
 
 ### Manual click-through (optional)
 
@@ -361,12 +374,15 @@ cd backend && npm run dev
 cd frontend && npm run dev
 ```
 
-Open http://localhost:5173. Login: `admin` / `password`.
+Open http://localhost:5173. Logins: `admin` / `password`, `viewer` / `password`.
 
 ### CI
 
-`.github/workflows/ci.yml` on every PR: backend tests → verify openapi.json →
-`npm run generate:types` → build → `npm test` → `npm run test:e2e`.
+`.github/workflows/ci.yml` on every PR: backend tests → Schemathesis contract →
+verify openapi.json → build frontend → `npm test` → smoke e2e.
+
+`.github/workflows/nightly-e2e.yml` runs regression e2e on a schedule (and via
+workflow_dispatch).
 
 ---
 
@@ -390,7 +406,8 @@ frontend/
     │   ├── feedback-form.acceptance.test.tsx
     │   └── complaints-list.test.tsx
     ├── e2e/
-    │   └── feedback-flow.spec.ts
+    │   ├── smoke/
+    │   └── regression/
     ├── mocks/handlers.ts       fake API + failure toggles
     └── helpers/
         ├── render.tsx          QueryClient + router + route helpers

@@ -9,7 +9,8 @@
     "generate:types": "openapi-typescript ../backend/openapi.json -o src/types/api.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test tests/e2e/smoke",
+    "test:e2e:regression": "playwright test tests/e2e/regression"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.102.8",

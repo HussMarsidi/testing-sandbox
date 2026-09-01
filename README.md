@@ -23,8 +23,9 @@ A feedback form: **name, email, category, message.**
 
 A second page that lists everything submitted. **Requires sign-in.**
 
-- Frontend: complaints list page (protected route)
-- Backend: `GET /api/complaints` (JWT bearer auth)
+- Frontend: complaints list + detail page, status filters, role-based status controls
+- Backend: `GET /api/complaints`, `GET /api/complaints/:id`, `PATCH /api/complaints/:id` (admin)
+- Users: `admin` / `password` (read + update status), `viewer` / `password` (read only)
 
 ### Supporting APIs
 
@@ -43,8 +44,11 @@ cd backend && npm install && npm run dev
 cd frontend && npm install && npm run dev
 
 # tests
+cd backend && npm test
+cd backend && npm run test:contract
 cd frontend && npm test          # unit + feature (fast, fake backend)
-cd frontend && npm run test:e2e  # e2e (real backend + real SQLite)
+cd frontend && npm run test:e2e  # smoke e2e (real backend + real SQLite)
+cd frontend && npm run test:e2e:regression  # nightly-style regression e2e
 ```
 
 Backend default: `http://localhost:3001`  

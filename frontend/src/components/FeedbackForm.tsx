@@ -1,7 +1,6 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { createComplaint } from "../lib/api";
-import { useCategories } from "../lib/queries";
+import { useCategories, useCreateComplaintMutation } from "../lib/queries";
 import {
   COPY,
   getFieldError,
@@ -20,14 +19,15 @@ const initialValues: ComplaintFormValues = {
 
 export function FeedbackForm() {
   const { categories, isLoading, error: categoriesError } = useCategories();
+  const createComplaint = useCreateComplaintMutation();
   const [values, setValues] = useState<ComplaintFormValues>(initialValues);
   const [errors, setErrors] = useState<FieldError[]>([]);
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const categoriesUnavailable = Boolean(categoriesError);
-  const formDisabled = isLoading || categoriesUnavailable || isSubmitting;
+  const formDisabled =
+    isLoading || categoriesUnavailable || createComplaint.isPending;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -45,10 +45,8 @@ export function FeedbackForm() {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      await createComplaint({
+      await createComplaint.mutateAsync({
         name: values.name.trim(),
         email: values.email.trim(),
         category: values.category as CreateComplaint["category"],
@@ -60,8 +58,6 @@ export function FeedbackForm() {
       setSuccessMessage(COPY.successMessage);
     } catch {
       setServerError(COPY.serverErrorMessage);
-    } finally {
-      setIsSubmitting(false);
     }
   }
 

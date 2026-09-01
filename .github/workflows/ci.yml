@@ -37,6 +37,18 @@ jobs:
         working-directory: backend
         run: npm test
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Schemathesis
+        run: pip install -r backend/requirements-contract.txt
+
+      - name: Run OpenAPI contract tests
+        working-directory: backend
+        run: npm run test:contract
+
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
@@ -57,6 +69,6 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps chromium
 
-      - name: Run e2e test
+      - name: Run smoke e2e tests
         working-directory: frontend
         run: npm run test:e2e

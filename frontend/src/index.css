@@ -132,6 +132,32 @@ button:disabled {
   font-size: 0.9rem;
 }
 
+.complaint-filters {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.status-badge {
+  font-weight: 600;
+}
+
+.status-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-control select {
+  width: auto;
+  min-width: 9rem;
+}
+
+.complaint-detail {
+  margin-top: 1rem;
+}
+
 a.active {
   font-weight: 700;
 }

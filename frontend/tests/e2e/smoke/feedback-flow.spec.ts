@@ -14,7 +14,7 @@ const COPY = {
   loginButton: "Sign in",
 } as const;
 
-test("submits feedback, signs in, and shows it on the complaints page", async ({
+test("@smoke submits feedback, signs in, and shows it on the complaints page", async ({
   page,
 }) => {
   const uniqueMessage = `E2E complaint at ${Date.now()}`;

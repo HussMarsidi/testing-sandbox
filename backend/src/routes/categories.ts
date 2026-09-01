@@ -1,5 +1,6 @@
-import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { createRoute, z } from "@hono/zod-openapi";
 import { listCategories } from "../categories.js";
+import { createOpenAPIApp } from "../openapi-app.js";
 import { CategoryOptionSchema } from "../schemas.js";
 
 const listCategoriesRoute = createRoute({
@@ -27,7 +28,7 @@ const listCategoriesRoute = createRoute({
   },
 });
 
-export const categoriesApp = new OpenAPIHono();
+export const categoriesApp = createOpenAPIApp();
 
 categoriesApp.openapi(listCategoriesRoute, (c) => {
   try {

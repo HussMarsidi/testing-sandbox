@@ -2,6 +2,8 @@ import { scryptSync, timingSafeEqual } from "node:crypto";
 
 export const DEFAULT_ADMIN_USERNAME = "admin";
 export const DEFAULT_ADMIN_PASSWORD = "password";
+export const DEFAULT_VIEWER_USERNAME = "viewer";
+export const DEFAULT_VIEWER_PASSWORD = "password";
 const PASSWORD_SALT = "feedback-sandbox-salt";
 
 export function hashPassword(password: string): string {

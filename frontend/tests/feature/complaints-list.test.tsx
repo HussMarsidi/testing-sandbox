@@ -60,6 +60,7 @@ describe("ComplaintsListPage", () => {
             email: "jane@example.com",
             category: "bug",
             message: "The submit button does not work on mobile.",
+            status: "open",
             created_at: "2026-09-01T12:00:00.000Z",
           },
         ]),
