@@ -1,0 +1,25 @@
+{
+  "name": "feedback-sandbox-backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "test": "vitest run",
+    "generate:openapi": "tsx src/scripts/generate-openapi.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.4",
+    "@hono/zod-openapi": "^0.19.8",
+    "better-sqlite3": "^11.9.0",
+    "hono": "^4.7.10",
+    "zod": "^3.25.28"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.15.21",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  }
+}

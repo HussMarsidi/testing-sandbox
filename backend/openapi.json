@@ -1,0 +1,202 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Feedback Sandbox API",
+    "version": "1.0.0",
+    "description": "Complaint submission and listing for the feedback sandbox."
+  },
+  "components": {
+    "schemas": {
+      "Complaint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "jane@example.com"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "bug",
+              "feature_request",
+              "other"
+            ],
+            "example": "bug"
+          },
+          "message": {
+            "type": "string",
+            "example": "The submit button does not work on mobile."
+          },
+          "created_at": {
+            "type": "string",
+            "example": "2026-09-01T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "category",
+          "message",
+          "created_at"
+        ]
+      },
+      "CreateComplaintResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "example": 1
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Validation failed"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "field",
+                "message"
+              ]
+            }
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "CreateComplaint": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "example": "Jane Doe"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 255,
+            "format": "email",
+            "example": "jane@example.com"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "bug",
+              "feature_request",
+              "other"
+            ],
+            "example": "bug"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 2000,
+            "example": "The submit button does not work on mobile."
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "category",
+          "message"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/api/complaints": {
+      "get": {
+        "tags": [
+          "Complaints"
+        ],
+        "summary": "List all complaints",
+        "responses": {
+          "200": {
+            "description": "All complaints, newest first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Complaint"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Complaints"
+        ],
+        "summary": "Submit a new complaint",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateComplaint"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Complaint created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateComplaintResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

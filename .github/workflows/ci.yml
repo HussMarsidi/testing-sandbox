@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Verify OpenAPI contract is committed
+        working-directory: backend
+        run: |
+          npm run generate:openapi
+          git diff --exit-code openapi.json
+
+      - name: Run backend tests
+        working-directory: backend
+        run: npm test
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Regenerate frontend API types
+        working-directory: frontend
+        run: npm run generate:types
+
+      - name: Typecheck and build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Run unit and feature tests
+        working-directory: frontend
+        run: npm test
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run e2e test
+        working-directory: frontend
+        run: npm run test:e2e
